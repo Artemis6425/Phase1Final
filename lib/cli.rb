@@ -90,7 +90,6 @@ class Cli   #probably split some of these commands into different files for ease
         if @found == 0
             puts "\n"
             puts "I'm not finding any of those."
-            binding.pry
             thirdmenu(userinput)
         elsif @found == 1
             puts @itemname
