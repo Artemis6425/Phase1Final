@@ -23,6 +23,7 @@ class CLI   #probably split some of these commands into different files for ease
             exit_program
         end
         secondmenu
+        return
     end
 
     def secondmenu
@@ -44,6 +45,7 @@ class CLI   #probably split some of these commands into different files for ease
             mainmenu
         end
         thirdmenu(userinput)
+        return
     end
 
     def thirdmenu(userinput)
@@ -51,11 +53,6 @@ class CLI   #probably split some of these commands into different files for ease
         puts "What kind of #{userinput} item did you say it was, again?"
         puts "(Enter the name of the #{userinput})"
         self.thirdinput(userinput)
-        puts "\n"
-        puts "Hmm... it looks like your #{@itemname} is worth #{@itemvalue} chaos."
-        puts "I'm not looking to buy any, but I'm sure there's other exiles that woud love #{@itemname}s."
-        puts "\n"
-        puts "Is there anything else I can help you with?"
         mainmenu
     end
 
@@ -67,44 +64,61 @@ class CLI   #probably split some of these commands into different files for ease
             puts "Could you speak up? I didn't catch that."
             thirdinput(userinput)
             return
+        elsif input == "Chaos" || input == "Chaos Orb"
+            puts "\n"
+            puts "Chaos are the default curreny of this place. It's worth one of itself."
+            puts "Anything else?"
+            return
         end
-        if ITEM.all.select do |temp|
+        ITEM.all.select do |temp|
             if temp.name.include?(input)
                 @itemname = temp.name
                 @itemvalue = temp.value
                 puts "success?!"
+                putsitemvalue
                 return
             end
         end
         itemlist = API.fetch_thing(userinput)
         if API.type == "item"
+            puts "api called"
             itemlist.each do |item|
-                ITEM.new(item['name'],item['chaosValue'])
+                ITEM.new(item['name'],item['chaosValue'].round(1))
                 if item['name'].include?(input)
                     @itemname = item['name']
                     @itemvalue = item['chaosValue'].round(1)
                     @found = 1
-                    puts "api called"
                 end
                 i+=1
             end
         elsif API.type == "currency"
+            puts "api called"
             itemlist.each do |item|
+                ITEM.new(item['currencyTypeName'],item['receive']['value'].round(1))
                 if item['currencyTypeName'].include?(input)
                     @itemname = item['currencyTypeName']
                     @itemvalue = item['receive']['value'].round(1)
+                    @found = 1
                 end
-                @found = 1
+                i+=1
             end
-            i+=1
         end
         if @found == 0
             puts "\n"
             puts "I'm not finding any of those."
             thirdmenu(userinput)
+            return
         end
+        putsitemvalue
     end
-    end #I don't get why i need this, I think I counted correctly
+
+    def putsitemvalue
+        puts "\n"
+        puts "Hmm... it looks like your #{@itemname} is worth #{@itemvalue} chaos."
+        puts "I'm not looking to buy any, but I'm sure there's other exiles that woud love #{@itemname}s."
+        puts "\n"
+        puts "Is there anything else I can help you with?"
+    end
 
     def exit_program
         puts "\n"
