@@ -1,4 +1,4 @@
-class Cli   #probably split some of these commands into different files for ease of use
+class CLI   #probably split some of these commands into different files for ease of use
     def start
         puts "==Welcome to Exile's First Price Checking Utility (A Path of Exile tool)!=="
         puts "\n"
@@ -9,12 +9,7 @@ class Cli   #probably split some of these commands into different files for ease
         #sleep(2)
         puts "My name is Nessa. How can I help you this evening here in Lioneye's Watch?"
         #sleep(2)
-        updateapi
         mainmenu
-    end
-
-    def updateapi
-        @Fossils = API.fetch_thing("Fossils")
     end
 
     def mainmenu
@@ -64,19 +59,26 @@ class Cli   #probably split some of these commands into different files for ease
     end
 
     def thirdinput(userinput)
-        itemlist = API.fetch_thing(userinput)
         input = gets.strip
+        itemlist = API.fetch_thing(userinput)
         @found = 0
         i=0
+        if ITEM.all.select do |temp|
+            if temp.name.include?(input)
+                puts "success!"
+                binding.pry
+            end
+        end
         if API.type == "item"
             itemlist.each do |item|
+                ITEM.new(item['name'],item['chaosValue'])
                 if item['name'].include?(input)
                     @itemname = item['name']
                     @itemvalue = item['chaosValue'].round(1)
+                    @found = 1
                 end
-                @found = 1
+                i+=1
             end
-            i+=1
         elsif API.type == "currency"
             itemlist.each do |item|
                 if item['currencyTypeName'].include?(input)
@@ -91,10 +93,9 @@ class Cli   #probably split some of these commands into different files for ease
             puts "\n"
             puts "I'm not finding any of those."
             thirdmenu(userinput)
-        elsif @found == 1
-            puts @itemname
         end
     end
+    end #I don't get why i need this, I think I counted correctly
 
     def exit_program
         puts "\n"
