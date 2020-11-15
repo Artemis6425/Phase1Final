@@ -41,6 +41,7 @@ class CLI   #probably split some of these commands into different files for ease
         if userinput == "back"
             puts "\n"
             puts "If you say so. Anything else?"
+            mainmenu
         end
         thirdmenu(userinput)
     end
@@ -59,16 +60,23 @@ class CLI   #probably split some of these commands into different files for ease
     end
 
     def thirdinput(userinput)
-        input = gets.strip
-        itemlist = API.fetch_thing(userinput)
+        input = gets.strip  
         @found = 0
         i=0
+        if input == ""
+            puts "Could you speak up? I didn't catch that."
+            thirdinput(userinput)
+            return
+        end
         if ITEM.all.select do |temp|
             if temp.name.include?(input)
-                puts "success!"
-                binding.pry
+                @itemname = temp.name
+                @itemvalue = temp.value
+                puts "success?!"
+                return
             end
         end
+        itemlist = API.fetch_thing(userinput)
         if API.type == "item"
             itemlist.each do |item|
                 ITEM.new(item['name'],item['chaosValue'])
@@ -76,6 +84,7 @@ class CLI   #probably split some of these commands into different files for ease
                     @itemname = item['name']
                     @itemvalue = item['chaosValue'].round(1)
                     @found = 1
+                    puts "api called"
                 end
                 i+=1
             end
