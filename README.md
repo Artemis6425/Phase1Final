@@ -22,6 +22,6 @@ This CLI project is available as open source under the terms of the MIT License.
 
 Example Items:
 
-Fossil -> Fractured Fossil // Prismatic Fossil
-Currency -> Mirror Shard // Orb of Annulment
+Fossil -> Fractured Fossil // Prismatic Fossil ||
+Currency -> Mirror Shard // Orb of Annulment ||
 Scarab -> Rusted Legion Scarab // Gilded Metamorph Scarab
