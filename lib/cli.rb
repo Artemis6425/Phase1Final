@@ -9,6 +9,7 @@ class CLI   #probably split some of these commands into different files for ease
         #sleep(2)
         puts "My name is Nessa. How can I help you this evening here in Lioneye's Watch?"
         #sleep(2)
+        @exile = USER.new
         mainmenu
     end
 
@@ -16,11 +17,14 @@ class CLI   #probably split some of these commands into different files for ease
         testprompt = TTY::Prompt.new
         userinput = testprompt.select("") do |menu|
             menu.choice "Price Check Item",1
+            menu.choice "Total Value of My Items",3
             menu.choice "Exit Lioneye's Watch",2
         end
         #userinput = self.maininput
         if userinput == 2
             exit_program
+        elsif userinput == 3
+            quickvalue
         end
         secondmenu
         return
@@ -70,15 +74,7 @@ class CLI   #probably split some of these commands into different files for ease
             puts "Anything else?"
             return
         end
-        ITEM.all.select do |temp|
-            if temp.name.include?(input)
-                @itemname = temp.name
-                @itemvalue = temp.value
-                puts "success?!"
-                putsitemvalue
-                return
-            end
-        end
+        iterateitemandsave(input)
         itemlist = API.fetch_thing(userinput)
         if API.type == "item"
             puts "api called"
@@ -109,7 +105,7 @@ class CLI   #probably split some of these commands into different files for ease
             thirdmenu(userinput)
             return
         end
-        putsitemvalue
+        iterateitemandsave(input)
     end
 
     def putsitemvalue
@@ -117,7 +113,45 @@ class CLI   #probably split some of these commands into different files for ease
         puts "Hmm... it looks like your #{@itemname} is worth #{@itemvalue} chaos."
         puts "I'm not looking to buy any, but I'm sure there's other exiles that woud love #{@itemname}s."
         puts "\n"
+        puts "How many did you have? I'm trying to keep a total."
+        temp = gets.strip.to_i
+        puts "\n"
         puts "Is there anything else I can help you with?"
+        return temp
+    end
+
+    def iterateitemandsave(input)
+        ITEM.all.select do |temp|
+            if temp.name.include?(input)
+                @itemname = temp.name
+                @itemvalue = temp.value
+                puts "success?!"
+                idea = putsitemvalue
+                @exile.additem(temp.name, temp.value, idea)
+                return
+            end
+        end
+    end
+
+    def quickvalue
+        if @exile.items.empty?
+            puts "\n"
+            puts "I haven't valued anything for you yet."
+            mainmenu
+            return
+        end
+        puts "\n"
+        puts "Here's the list I have so far:"
+        i=0
+        @exile.items.each do |temp| #its always temp :)
+            i += temp.count*temp.value
+            puts "You have #{temp.count} #{temp.name}s with a total value of #{temp.count*temp.value} chaos"
+        end
+        puts "The total value of everything you have is #{i} chaos."
+        puts "\n"
+        puts "Is there anything else I can do for you this evening?"
+        mainmenu
+        return
     end
 
     def exit_program
