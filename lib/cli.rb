@@ -61,7 +61,8 @@ class CLI   #probably split some of these commands into different files for ease
     end
 
     def thirdinput(userinput)
-        input = gets.strip.capitalize()
+        input = gets.strip
+        testing = ""
         @found = 0
         i=0
         if input == ""
@@ -74,7 +75,12 @@ class CLI   #probably split some of these commands into different files for ease
             puts "Anything else?"
             return
         end
-        iterateitemandsave(input)
+        testing = iterateitemandsave(input)
+        if testing == "RETURN"
+            putsitemvalue
+            mainmenu
+            return
+        end
         itemlist = API.fetch_thing(userinput)
         if API.type == "item"
             #puts "api called"
@@ -87,6 +93,15 @@ class CLI   #probably split some of these commands into different files for ease
                 end
                 i+=1
             end
+            if @found == 0
+                puts "\n"
+                puts "I'm not finding any of those."
+                thirdmenu(userinput)
+                mainmenu
+                return
+            end
+            iterateitemandsave(input)
+            return
         elsif API.type == "currency"
             #puts "api called"
             itemlist.each do |item|
@@ -98,14 +113,15 @@ class CLI   #probably split some of these commands into different files for ease
                 end
                 i+=1
             end
-        end
-        if @found == 0
-            puts "\n"
-            puts "I'm not finding any of those."
-            thirdmenu(userinput)
+            if @found == 0
+                puts "\n"
+                puts "I'm not finding any of those."
+                thirdmenu(userinput)
+                return
+            end
+            iterateitemandsave(input)
             return
         end
-        iterateitemandsave(input)
     end
 
     def putsitemvalue
@@ -128,7 +144,7 @@ class CLI   #probably split some of these commands into different files for ease
                 #puts "success?!"
                 idea = putsitemvalue
                 @exile.additem(temp.name, temp.value, idea)
-                return
+                return "RETURN"
             end
         end
     end
