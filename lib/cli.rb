@@ -1,6 +1,6 @@
 class CLI   #probably split some of these commands into different files for ease of use
     def start
-        puts "==Welcome to Exile's First Price Checking Utility (A Path of Exile tool)!=="
+        puts "==Welcome to Exile's First Price Checking Utility! (A Path of Exile tool)=="
         puts "\n"
         #sleep(1)           These sleep commands fit thematically for speaking time, removed for faster testing
         puts "There are many items one may find around these parts."
@@ -61,7 +61,7 @@ class CLI   #probably split some of these commands into different files for ease
     end
 
     def thirdinput(userinput)
-        input = gets.strip  
+        input = gets.strip.capitalize()
         @found = 0
         i=0
         if input == ""
@@ -77,7 +77,7 @@ class CLI   #probably split some of these commands into different files for ease
         iterateitemandsave(input)
         itemlist = API.fetch_thing(userinput)
         if API.type == "item"
-            puts "api called"
+            #puts "api called"
             itemlist.each do |item|
                 ITEM.new(item['name'],item['chaosValue'].round(1))
                 if item['name'].include?(input)
@@ -88,7 +88,7 @@ class CLI   #probably split some of these commands into different files for ease
                 i+=1
             end
         elsif API.type == "currency"
-            puts "api called"
+            #puts "api called"
             itemlist.each do |item|
                 ITEM.new(item['currencyTypeName'],item['receive']['value'].round(1))
                 if item['currencyTypeName'].include?(input)
@@ -125,7 +125,7 @@ class CLI   #probably split some of these commands into different files for ease
             if temp.name.include?(input)
                 @itemname = temp.name
                 @itemvalue = temp.value
-                puts "success?!"
+                #puts "success?!"
                 idea = putsitemvalue
                 @exile.additem(temp.name, temp.value, idea)
                 return
