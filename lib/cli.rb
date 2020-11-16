@@ -12,7 +12,14 @@ class CLI   #probably split some of these commands into different files for ease
         @exile = USER.new
         mainmenu
     end
-
+    @@searched = {
+        "Fossil" => 0,
+        "Incubator" => 0,
+        "Resonator" => 0,
+        "Scarab" => 0,
+        "Fragment" => 0,
+        "Currency" => 0
+    }
     def mainmenu
         testprompt = TTY::Prompt.new
         userinput = testprompt.select("") do |menu|
@@ -61,8 +68,8 @@ class CLI   #probably split some of these commands into different files for ease
     end
 
     def thirdinput(userinput)
-        input = gets.strip
-        testing = ""
+        input = gets.strip.capitalize
+        @@searched[userinput] +=1
         @found = 0
         i=0
         if input == ""
@@ -75,52 +82,52 @@ class CLI   #probably split some of these commands into different files for ease
             puts "Anything else?"
             return
         end
-        testing = iterateitemandsave(input)
-        if testing == "RETURN"
-            putsitemvalue
+        if @@searched[userinput] != 1 #This if statement makes sure you don't bother the api too much
+            iterateitemandsave(input)
             mainmenu
             return
-        end
-        itemlist = API.fetch_thing(userinput)
-        if API.type == "item"
-            #puts "api called"
-            itemlist.each do |item|
-                ITEM.new(item['name'],item['chaosValue'].round(1))
-                if item['name'].include?(input)
-                    @itemname = item['name']
-                    @itemvalue = item['chaosValue'].round(1)
-                    @found = 1
+        else
+            itemlist = API.fetch_thing(userinput)
+            if API.type == "item"
+                #puts "api called"
+                itemlist.each do |item|
+                    ITEM.new(item['name'],item['chaosValue'].round(1))
+                    if item['name'].include?(input)
+                        @itemname = item['name']
+                        @itemvalue = item['chaosValue'].round(1)
+                        @found = 1
+                    end
+                    i+=1
                 end
-                i+=1
-            end
-            if @found == 0
-                puts "\n"
-                puts "I'm not finding any of those."
-                thirdmenu(userinput)
-                mainmenu
+                if @found == 0
+                    puts "\n"
+                    puts "I'm not finding any of those."
+                    thirdmenu(userinput)
+                    mainmenu
+                    return
+                end
+                iterateitemandsave(input)
+                return
+            elsif API.type == "currency"
+                #puts "api called"
+                itemlist.each do |item|
+                    ITEM.new(item['currencyTypeName'],item['receive']['value'].round(1))
+                    if item['currencyTypeName'].include?(input)
+                        @itemname = item['currencyTypeName']
+                        @itemvalue = item['receive']['value'].round(1)
+                        @found = 1
+                    end
+                    i+=1
+                end
+                if @found == 0
+                    puts "\n"
+                    puts "I'm not finding any of those."
+                    thirdmenu(userinput)
+                    return
+                end
+                iterateitemandsave(input)
                 return
             end
-            iterateitemandsave(input)
-            return
-        elsif API.type == "currency"
-            #puts "api called"
-            itemlist.each do |item|
-                ITEM.new(item['currencyTypeName'],item['receive']['value'].round(1))
-                if item['currencyTypeName'].include?(input)
-                    @itemname = item['currencyTypeName']
-                    @itemvalue = item['receive']['value'].round(1)
-                    @found = 1
-                end
-                i+=1
-            end
-            if @found == 0
-                puts "\n"
-                puts "I'm not finding any of those."
-                thirdmenu(userinput)
-                return
-            end
-            iterateitemandsave(input)
-            return
         end
     end
 
@@ -141,11 +148,17 @@ class CLI   #probably split some of these commands into different files for ease
             if temp.name.include?(input)
                 @itemname = temp.name
                 @itemvalue = temp.value
-                #puts "success?!"
+                @found = 1
                 idea = putsitemvalue
                 @exile.additem(temp.name, temp.value, idea)
-                return "RETURN"
+                mainmenu
             end
+        end
+        if @found == 0
+            puts "\n"
+            puts "I couldn't find those. I think its best we restart."
+            mainmenu
+            return
         end
     end
 
@@ -163,7 +176,7 @@ class CLI   #probably split some of these commands into different files for ease
             i += temp.count*temp.value
             puts "You have #{temp.count} #{temp.name}s with a total value of #{temp.count*temp.value} chaos"
         end
-        puts "The total value of everything you have is #{i} chaos."
+        puts "The total value of everything you have is #{i.round(1)} chaos."
         puts "\n"
         puts "Is there anything else I can do for you this evening?"
         mainmenu
