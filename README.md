@@ -20,6 +20,10 @@ License:
 
 This CLI project is available as open source under the terms of the MIT License.
 
+Bugs:
+
+Right now, the program does not like if you mistype or try to price an item multiple times. Don't do that for now.
+
 Example Items:
 
 Fossil -> Fractured Fossil // Prismatic Fossil ||
